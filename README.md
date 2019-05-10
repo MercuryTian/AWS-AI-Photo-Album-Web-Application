@@ -4,6 +4,8 @@
 
 ## Features
 
+- Login Page: https://s3.amazonaws.com/cc3-bucket2/apiGateway-js-sdk/album.html
+
 - Upload photos
 
 - Search photos by keywords, the utterances are:
