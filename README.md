@@ -42,7 +42,7 @@
 
 ## Service Architecture
 
-![architecture](/Users/macbook/Desktop/Master 1/9223A-CC/Assignment 3/architecture.png)
+![architecture](https://github.com/MercuryTian/AWS-AI-Photo-Album-Web-Application/blob/master/architecture.png)
 
 
 
