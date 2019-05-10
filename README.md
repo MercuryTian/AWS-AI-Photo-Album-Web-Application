@@ -1,6 +1,8 @@
-# AWS-AI-Photo-Album-Web-Application
+# Photo Album Web Application
 
 ##### Zhengxi Tian - zt586
+
+
 
 ## Features
 
@@ -40,7 +42,7 @@
 
 ## Service Architecture
 
-![architecture](/Users/macbook/Desktop/architecture.png)
+![architecture](/Users/macbook/Desktop/Master 1/9223A-CC/Assignment 3/architecture.png)
 
 
 
@@ -79,11 +81,12 @@
 
 ## S3
 
-1. Create a S3 bucket `cc3-photos` (**B2**) to store the photos
+1. Create a S3 bucket `cc3-photos` (**B1**) to store the photos
 2. Set up a PUT trigger on S3 bucket
    - Properties -> Events -> set up a PUT trigger `uploadPhoto` and connect with lambda function.
    - Make public of the bucket to make sure we can access the photos.
-3. 
+3. Create a S3 bucket for your frontend (**B2**).
+4. Set up the bucket for static website hosting. Upload the frontend files to the bucket (**B2**). Integrate the API Gateway-generated SDK (**SDK1**) into the frontend, to connect API.  
 
 
 
