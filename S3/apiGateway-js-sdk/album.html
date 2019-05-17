@@ -86,15 +86,55 @@
         padding: 5px 15px;
         margin-left: 10px;
         }
+        #record {
+            background-color: red; /* Green */
+            border-width: medium;
+            border-color: black;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            max-width: 50%;
+            max-height: 15%;
+            border-radius: 50%;
+            left: 100px;
+            right: 100px;
+            position: relative;
+        }
+        #stopRecord {
+            background-color: green; /* Green */
+            border-width: medium;
+            border-color: black;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            max-width: 50%;
+            max-height: 15%;
+            border-radius: 50%;
+            left: 100px;
+            right: 100px;
+            position: relative;
+        }
+        #recordedAudio {
+            left: 100px;
+            right: 100px;
+            position: relative;
+        }
     </style>
 </head>
 
 <body>
     <div class="container">
         <form method="post" action="" enctype="multipart/form-data" id="myform">
-            <div class='preview'>
-                <img src="" id="img" width="100" height="100">
-            </div>
             <div >
                 <input type="file" id="file" name="file"/>
                 <input type="button" class="button" value="Upload" id="but_upload">
@@ -107,14 +147,17 @@
         <div id="container1"> 
             <input type="text" id="searchin" placeholder="Search..."/> 
             <button id="btngo" class="btn btn-primary" type="button">Search</button> 
-        </div> 
-<!--         <div id="container2"> 
-            <ul id="list" > 
-                <li href="http://www.google.it">Google</li> 
-                <li href="http://www.yahoo.it">Yahoo</li> 
-                <li href="http://www.amazon.it">Amazon</li> 
-            </ul> 
-        </div> -->
+        </div>
+        <div>
+            <p>
+                <button id=record>Voice search</button>
+                <button id=stopRecord disabled>Stop</button>
+            </p>
+            <p>
+                <audio id=recordedAudio></audio>
+        
+            </p>
+        </div>
     </div>
 
 </body>
@@ -128,6 +171,7 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="recorder.mp3.min.js"></script>
 <script type="text/javascript" src="lib/axios/dist/axios.standalone.js"></script>
 <script type="text/javascript" src="lib/CryptoJS/rollups/hmac-sha256.js"></script>
 <script type="text/javascript" src="lib/CryptoJS/rollups/sha256.js"></script>
@@ -141,6 +185,8 @@
 <script type="text/javascript" src="apigClient.js"></script>
 
 <script type="text/javascript">
+    /*** Connect with API Gateway ***/
+    var apigClient = apigClientFactory.newClient();
 
     function showImage(src, width, height, alt) {
         var img = document.createElement("img");
@@ -173,14 +219,92 @@
                 // console.log(response.data)
                 alert("Upload successful!!");
             })
-
-
         });
     });
 
+    var rec=Recorder({
+        bitRate:32,
+        sampleRate:24000
+        });
 
-    /*** Connect with API Gateway ***/
-    var apigClient = apigClientFactory.newClient();
+    function sendData(data) {
+        let config = {
+                headers:{'Content-Type': data.type}
+            };
+
+        url = 'https://tg0swa682e.execute-api.us-east-1.amazonaws.com/test1/upload/cc3-voices/test.mp3'
+        axios.put(url,data,config).then(response=>{
+            // console.log(response.data)
+            // alert("Upload successful!!");
+            query = "voiceSearch";
+            params = {q: query};
+            apigClient.searchGet(params, {}, {})
+                .then(function(result){
+                    //This is where you would put a success callback
+                    console.log(result);
+                }).catch(function(result){
+                    //This is where you would put an error callback
+                    console.log(result);
+                });
+            setTimeout(function(){
+                params = {q: "voiceResult"};
+                apigClient.searchGet(params, {}, {})
+                .then(function(result){
+                //This is where you would put a success callback
+                console.log(result);
+                // 这里写showImage的函数
+                let img_list = result.data
+                if(img_list === "No such photos.") {
+                    alert("No such photos!!")
+                    return
+                }
+                for (var i = 0; i < img_list.length; i++) {
+                    img_url = img_list[i];
+                    new_img = document.createElement('img');
+                    new_img.src = img_url;
+                    document.body.appendChild(new_img);
+                }
+                
+                }).catch(function(result){
+                //This is where you would put an error callback
+                    console.log(result);
+                    alert("No such photos!!");
+                });
+            }, 120000);
+        }).catch(err => {
+            console.log(err);
+        })
+    }
+
+    record.onclick = e => {
+        console.log('I was clicked')
+        record.disabled = true;
+        record.style.backgroundColor = "blue"
+        stopRecord.disabled=false;
+
+        rec.open(function(){
+            rec.start();
+        },function(msg,isUserNotAllow){
+            console.log((isUserNotAllow?"UserNotAllow，":"")+"can't record:"+msg);
+        });
+    }
+    stopRecord.onclick = e => {
+        console.log("I was clicked")
+        record.disabled = false;
+        stop.disabled=true;
+        record.style.backgroundColor = "red"
+        rec.stop(function(blob,duration){
+            console.log(URL.createObjectURL(blob),"Duration:"+duration+"ms");
+            console.log(blob);
+            rec.close();
+            var audio=document.createElement("audio");
+            audio.controls=true;
+            document.body.appendChild(audio);
+            audio.src=URL.createObjectURL(blob);
+            // audio.play();
+            sendData(blob);
+        });
+    }
 
 
     // after clcik the search button, show the search result
