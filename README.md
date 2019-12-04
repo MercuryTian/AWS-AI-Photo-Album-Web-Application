@@ -1,6 +1,6 @@
 # Photo Album Web Application
 
-##### Zhengxi Tian - zt586
+##### Zhengxi Tian
 
 
 
